@@ -21,6 +21,7 @@ CXXFLAGS := \
     -I$(GLFW_DIR)/include \
     -I$(IMGUI_DIR) \
     -I$(IMGUI_DIR)/backends \
+	-I$(SRC_DIR) \
 	`pkg-config --cflags glfw3 vulkan`
 
 LDFLAGS :=
