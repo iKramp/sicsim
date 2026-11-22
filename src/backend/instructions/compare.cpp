@@ -2,7 +2,7 @@
 
 namespace SicSimBackend {
     ModificationList OpComp::handle(uint32_t instruction,
-                            uint32_t instruction_address, MachineState &machine_state) {
+                            uint24_t instruction_address, MachineState &machine_state) {
         Format34Instruction decoded =
             decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
         ModificationList modifications;
@@ -20,7 +20,7 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpComp::display_instruction(uint32_t instruction, uint32_t instruction_address,
+    std::string OpComp::display_instruction(uint32_t instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         std::string out =
             "COMP " +
@@ -29,7 +29,7 @@ namespace SicSimBackend {
     }
 
     ModificationList OpCompr::handle(uint32_t instruction,
-                            uint32_t instruction_address, MachineState &machine_state) {
+                            uint24_t instruction_address, MachineState &machine_state) {
         Format2Instruction decoded =
             decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
@@ -48,7 +48,7 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpCompr::display_instruction(uint32_t instruction, uint32_t instruction_address,
+    std::string OpCompr::display_instruction(uint32_t instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         Format2Display out = display_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         std::string out_str = "COMPR " + out.reg1_name + ", " + out.reg2_name;
@@ -56,7 +56,7 @@ namespace SicSimBackend {
     }
 
     ModificationList OpTix::handle(uint32_t instruction,
-                            uint32_t instruction_address, MachineState &machine_state) {
+                            uint24_t instruction_address, MachineState &machine_state) {
         Format34Instruction decoded =
             decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
         ModificationList modifications;
@@ -77,7 +77,7 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpTix::display_instruction(uint32_t instruction, uint32_t instruction_address,
+    std::string OpTix::display_instruction(uint32_t instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         std::string out =
             "TIX " +
@@ -86,7 +86,7 @@ namespace SicSimBackend {
     }
 
     ModificationList OpTixr::handle(uint32_t instruction,
-                            uint32_t instruction_address, MachineState &machine_state) {
+                            uint24_t instruction_address, MachineState &machine_state) {
         Format2Instruction decoded =
             decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
@@ -108,7 +108,7 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpTixr::display_instruction(uint32_t instruction, uint32_t instruction_address,
+    std::string OpTixr::display_instruction(uint32_t instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         Format2Display out = display_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         std::string out_str = "TIXR " + out.reg1_name;

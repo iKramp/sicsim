@@ -3,12 +3,12 @@
 #include <cstdint>
 
 namespace SicSimBackend {
-    //24B numbers
+    // 24B numbers
 
     class uint24_t {
         uint32_t value;
 
-        public:
+    public:
         uint24_t() : value(0) {}
         uint24_t(uint64_t v) : value(v & 0xFFFFFF) {}
 
@@ -31,8 +31,8 @@ namespace SicSimBackend {
     class float48_t {
         uint64_t value;
 
-        public:
+    public:
         float48_t() : value(0) {}
         float48_t(uint64_t v) : value(v & 0xFFFFFFFFFFFF) {}
     };
-}
+} // namespace SicSimBackend

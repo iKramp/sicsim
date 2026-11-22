@@ -6,8 +6,8 @@ namespace SicSimBackend {
     class InstructionHandler {
     public:
         virtual ModificationList handle(uint32_t instruction,
-                            uint32_t instruction_address, MachineState &machine_state) = 0;
-        virtual std::string display_instruction(uint32_t instruction, uint32_t instruction_address, MachineState &machine_state) = 0;
+                            uint24_t instruction_address, MachineState &machine_state) = 0;
+        virtual std::string display_instruction(uint32_t instruction, uint24_t instruction_address, MachineState &machine_state) = 0;
     };
 
     class Format2Instruction {
@@ -42,8 +42,8 @@ namespace SicSimBackend {
     InstructionHandler *get_instruction_handler(uint8_t opcode);
 
     Format2Instruction decode_format2(uint8_t *instruction, MachineState &machine_state);
-    Format34Instruction decode_format34(uint8_t *instruction, uint32_t instruction_address, MachineState &machine_state);
+    Format34Instruction decode_format34(uint8_t *instruction, uint24_t instruction_address, MachineState &machine_state);
 
     Format2Display display_format2(uint8_t *instruction, MachineState &machine_state);
-    Format34Display display_format34(uint8_t *instruction, uint32_t instruction_address, MachineState &machine_state);
+    Format34Display display_format34(uint8_t *instruction, uint24_t instruction_address, MachineState &machine_state);
 } // namespace SicSimBackend

@@ -9,8 +9,7 @@ static uint32_t max_written_address = 0;
 
 namespace SicSimBackend {
     MachineState::MachineState()
-        : rA(uint24_t()), rX(uint24_t()), rL(uint24_t()), rS(uint24_t()), rT(uint24_t()), rB(uint24_t()),
-          rSW(uint24_t()), rF(0), PC(uint24_t()) {}
+        : rA(uint24_t()), rX(uint24_t()), rL(uint24_t()), rS(uint24_t()), rT(uint24_t()), rB(uint24_t()), rSW(uint24_t()), rF(0), PC(uint24_t()) {}
 
     MachineState MachineState::clone() {
         MachineState copy;
@@ -26,7 +25,7 @@ namespace SicSimBackend {
         return copy;
     }
 
-    void MachineState::applyModifications(ModificationList modifications) {
+    void MachineState::apply_modifications(ModificationList modifications) {
         bool pc_modified = false;
 
         for (const auto &modification : modifications) {
@@ -82,7 +81,7 @@ namespace SicSimBackend {
         }
     }
 
-    uint24_t MachineState::getRegisterValue(uint8_t reg_num) {
+    uint24_t MachineState::get_register_value(uint8_t reg_num) {
         switch (reg_num) {
         case 0:
             return rA;
@@ -105,17 +104,24 @@ namespace SicSimBackend {
         }
     }
 
-    void init_memory() { 
-        memset(memory, 0, MEM_SIZE); 
+    void MachineState::print_state() {
+        printf("A: 0x%06X, X: 0x%06X, L: 0x%06X, S: 0x%06X, T: 0x%06X, B: 0x%06X, SW: 0x%06X, F: 0x%012lX, PC: 0x%06X\n", rA.get_unsigned(),
+               rX.get_unsigned(), rL.get_unsigned(), rS.get_unsigned(), rT.get_unsigned(), rB.get_unsigned(), rSW.get_unsigned(), rF,
+               PC.get_unsigned());
+    }
+
+    void init_memory() {
+        memset(memory, 0, MEM_SIZE);
         max_written_address = 0;
     }
 
-    void write_memory_region(uint32_t address, const std::vector<uint8_t> &data) {
-        if (address + data.size() > MEM_SIZE) {
+    void write_memory_region(uint24_t address, const std::vector<uint8_t> &data) {
+        uint32_t addr = address.get_unsigned();
+        if (addr + data.size() > MEM_SIZE) {
             return;
         }
-        memcpy(&memory[address], data.data(), data.size());
-        max_written_address = std::max(max_written_address, address + static_cast<uint32_t>(data.size()));
+        memcpy(&memory[addr], data.data(), data.size());
+        max_written_address = std::max(max_written_address, addr + static_cast<uint32_t>(data.size()));
     }
 
     void write_memory_byte(uint24_t address, uint8_t data) {
@@ -156,8 +162,7 @@ namespace SicSimBackend {
             return 0;
         }
         uint32_t value = (static_cast<uint32_t>(memory[address.get_unsigned()]) << 16) |
-                         (static_cast<uint32_t>(memory[address.get_unsigned() + 1]) << 8) |
-                         static_cast<uint32_t>(memory[address.get_unsigned() + 2]);
+                         (static_cast<uint32_t>(memory[address.get_unsigned() + 1]) << 8) | static_cast<uint32_t>(memory[address.get_unsigned() + 2]);
         return uint24_t(value);
     }
 
@@ -186,6 +191,29 @@ namespace SicSimBackend {
             return nullptr;
         }
         return &memory[address];
+    }
+
+    ModificationTarget reg_into_modification_target(Register reg) {
+        switch (reg) {
+        case Register::A:
+            return ModificationTarget::A;
+        case Register::X:
+            return ModificationTarget::X;
+        case Register::L:
+            return ModificationTarget::L;
+        case Register::S:
+            return ModificationTarget::S;
+        case Register::T:
+            return ModificationTarget::T;
+        case Register::B:
+            return ModificationTarget::B;
+        case Register::SW:
+            return ModificationTarget::SW;
+        case Register::PC:
+            return ModificationTarget::PC;
+        case Register::F:
+            return ModificationTarget::F;
+        }
     }
 
 } // namespace SicSimBackend

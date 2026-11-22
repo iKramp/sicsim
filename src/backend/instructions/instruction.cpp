@@ -24,8 +24,8 @@ namespace SicSimBackend {
         Format2Instruction decoded;
         uint8_t reg1 = (instruction[1] >> 4) & 0x0F;
         uint8_t reg2 = instruction[1] & 0x0F;
-        decoded.reg1_val = machine_state.getRegisterValue(reg1);
-        decoded.reg2_val = machine_state.getRegisterValue(reg2);
+        decoded.reg1_val = machine_state.get_register_value(reg1);
+        decoded.reg2_val = machine_state.get_register_value(reg2);
         Register reg1_enum = static_cast<Register>(reg1);
         Register reg2_enum = static_cast<Register>(reg2);
 
@@ -130,7 +130,7 @@ namespace SicSimBackend {
         return display;
     }
 
-    Format34Display display_format34(uint8_t *instruction, uint32_t instruction_address, MachineState &machine_state) {
+    Format34Display display_format34(uint8_t *instruction, uint24_t instruction_address, MachineState &machine_state) {
         Format34Display display;
         display.address_str = "temp";
         return display;

@@ -28,7 +28,7 @@ namespace SicSimBackend {
             return StepResult::INVALID_INSTRUCTION;
         }
         ModificationList modifications = handler->handle(instruction.first, instruction_address, machine_state);
-        machine_state.applyModifications(modifications);
+        machine_state.apply_modifications(modifications);
 
         for (const auto &modification : modifications) {
             if (modification.first.first == ModificationTarget::HALT) {

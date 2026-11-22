@@ -42,12 +42,14 @@ namespace SicSimBackend {
 
         MachineState();
 
-        std::string displayCurrentInstruction();
+        std::string display_current_instruction();
         MachineState clone();
         // returns what the next execution will modify
-        void applyModifications(ModificationList modifications);
+        void apply_modifications(ModificationList modifications);
 
-        uint24_t getRegisterValue(uint8_t reg_num);
+        uint24_t get_register_value(uint8_t reg_num);
+
+        void print_state();
     };
 
     void init_memory();
@@ -60,7 +62,8 @@ namespace SicSimBackend {
     //returns if there's any valid memory after this instruction
     std::pair<uint32_t, bool> read_memory_instruction(uint24_t address);
     uint8_t read_memory_byte(uint24_t address);
-    uint8_t *get_memory_pointer(uint24_t address);
+    uint8_t *get_memory_pointer(uint32_t address);
+
     ModificationTarget reg_into_modification_target(Register reg);
 
 } // namespace SicSimBackend
