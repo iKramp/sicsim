@@ -1,5 +1,5 @@
 #include "register_view.h"
-#include "backend/register.h"
+#include "mod.h"
 #include "imgui.h"
 #include <cstring>
 
@@ -42,7 +42,7 @@ namespace SicSimUi {
 
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase;
 
-        ImGui::Begin("Registers");
+        ImGui::Begin("Registers", nullptr, default_window_flags);
         for (int i = 0; i < NUM_REGISTERS; ++i) {
             if (changed) {
                 snprintf(render_string[i], render_string_length, name_strings[i].c_str(), regs[i]->get_unsigned());

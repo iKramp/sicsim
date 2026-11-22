@@ -22,7 +22,7 @@
 
         imgui = builtins.fetchGit {
           url = "https://github.com/ocornut/imgui.git";
-          rev = "77fe4588e6af934b4167b91312174ca3fbb0d71a";
+          rev = "33d9ed0d6bdeaf2fdd1636b72d68c268e851033f";
         };
 
         glfw = builtins.fetchGit {
