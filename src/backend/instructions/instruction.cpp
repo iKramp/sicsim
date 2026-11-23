@@ -7,6 +7,7 @@
 #include "backend/machine_state.h"
 #include "backend/number_util.h"
 #include "backend/register.h"
+#include <iostream>
 #include <stdexcept>
 
 static SicSimBackend::InstructionHandler *instruction_handler_table[256];
@@ -73,44 +74,41 @@ namespace SicSimBackend {
         }
 
         uint8_t ni;
-        uint8_t bp;
         ni = ((uint8_t)n << 1) | (uint8_t)i;
-        bp = ((uint8_t)b << 1) | (uint8_t)p;
 
         uint24_t address;
         uint24_t int_value;
         float48_t float_value;
-        bool value_set = false;
+        bool immediate = false;
         switch (ni) {
         case 0: // SIC
             address = offset;
             break;
         case 1:
             address = offset;
-            int_value = offset;
-            value_set = true;
+            immediate = true;
             break;
         case 2:
             address = read_memory(offset);
             break;
         case 3:
-            switch (bp) {
-            case 0:
-                address = offset;
-                break;
-            case 1: //PC relative
-                address = instruction_address.add(offset);
-                break;
-            case 2: //Base relative
-                address = machine_state.rB.add(offset);
-                break;
-            case 3: //Invalid
-                throw std::runtime_error("Invalid instruction: both base and pc relative addressing used");
-            }
+            address = offset;
+            break;
+        default:
+            throw std::runtime_error("Invalid instruction: invalid addressing mode");
             break;
         }
 
-        if (!value_set) {
+        if (p == 1) {
+            address = address.add(instruction_address).add(3);
+        }
+        if (b == 1) {
+            address = address.add(machine_state.rB);
+        }
+
+        if (immediate) {
+            int_value = address;
+        } else {
             int_value = read_memory(address);
         }
         float_value = read_memory_float(address);
@@ -118,6 +116,7 @@ namespace SicSimBackend {
         decoded.value = int_value;
         decoded.float_value = float_value;
         decoded.addr = address;
+        decoded.extended = e;
         return decoded;
     }
 
@@ -138,29 +137,29 @@ namespace SicSimBackend {
 
     void init_instruction_handler_table() {
         instruction_handler_table[0x00] = new OpLdReg(Register::A);
-        instruction_handler_table[0x01] = nullptr;
-        instruction_handler_table[0x02] = nullptr;
-        instruction_handler_table[0x03] = nullptr;
+        instruction_handler_table[0x01] = new OpLdReg(Register::A);
+        instruction_handler_table[0x02] = new OpLdReg(Register::A);
+        instruction_handler_table[0x03] = new OpLdReg(Register::A);
         instruction_handler_table[0x04] = new OpLdReg(Register::X);
-        instruction_handler_table[0x05] = nullptr;
-        instruction_handler_table[0x06] = nullptr;
-        instruction_handler_table[0x07] = nullptr;
+        instruction_handler_table[0x05] = new OpLdReg(Register::X);
+        instruction_handler_table[0x06] = new OpLdReg(Register::X);
+        instruction_handler_table[0x07] = new OpLdReg(Register::X);
         instruction_handler_table[0x08] = new OpLdReg(Register::L);
-        instruction_handler_table[0x09] = nullptr;
-        instruction_handler_table[0x0a] = nullptr;
-        instruction_handler_table[0x0b] = nullptr;
+        instruction_handler_table[0x09] = new OpLdReg(Register::L);
+        instruction_handler_table[0x0a] = new OpLdReg(Register::L);
+        instruction_handler_table[0x0b] = new OpLdReg(Register::L);
         instruction_handler_table[0x0c] = new OpStReg(Register::A);
-        instruction_handler_table[0x0d] = nullptr;
-        instruction_handler_table[0x0e] = nullptr;
-        instruction_handler_table[0x0f] = nullptr;
+        instruction_handler_table[0x0d] = new OpStReg(Register::A);
+        instruction_handler_table[0x0e] = new OpStReg(Register::A);
+        instruction_handler_table[0x0f] = new OpStReg(Register::A);
         instruction_handler_table[0x10] = new OpStReg(Register::X);
-        instruction_handler_table[0x11] = nullptr;
-        instruction_handler_table[0x12] = nullptr;
-        instruction_handler_table[0x13] = nullptr;
+        instruction_handler_table[0x11] = new OpStReg(Register::X);
+        instruction_handler_table[0x12] = new OpStReg(Register::X);
+        instruction_handler_table[0x13] = new OpStReg(Register::X);
         instruction_handler_table[0x14] = new OpStReg(Register::L);
-        instruction_handler_table[0x15] = nullptr;
-        instruction_handler_table[0x16] = nullptr;
-        instruction_handler_table[0x17] = nullptr;
+        instruction_handler_table[0x15] = new OpStReg(Register::L);
+        instruction_handler_table[0x16] = new OpStReg(Register::L);
+        instruction_handler_table[0x17] = new OpStReg(Register::L);
         instruction_handler_table[0x18] = new OpAdd();
         instruction_handler_table[0x19] = new OpAdd();
         instruction_handler_table[0x1a] = new OpAdd();

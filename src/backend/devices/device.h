@@ -2,6 +2,17 @@
 #include <cstdint>
 
 namespace SicSimBackend {
+    struct DeviceTarget {
+        uint8_t device_id;
+        uint8_t write_flag;
+
+        DeviceTarget(uint8_t device_id, uint8_t write_flag) : device_id(device_id), write_flag(write_flag) {}
+        DeviceTarget(uint32_t target) : device_id((target >> 8) & 0xFF), write_flag(target & 0xFF) {}
+        uint32_t to_uint32() const {
+            return (static_cast<uint32_t>(device_id) << 8) | static_cast<uint32_t>(write_flag);
+        }
+    };
+
     class Device {
     public:
         virtual uint8_t read() = 0;

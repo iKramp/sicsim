@@ -1,4 +1,5 @@
 #include "execution_loop.h"
+#include <array>
 #include "backend/instructions/instruction.h"
 #include "backend/machine_state.h"
 
@@ -10,24 +11,21 @@ namespace SicSimBackend {
         init_memory();
     }
 
-    void load_program(const std::vector<uint8_t> &program, uint32_t start_address) {
-        write_memory_region(start_address, program);
-        machine_state.PC = start_address;
-    }
-
     StepResult step_sim() {
         uint32_t instruction_address = machine_state.PC.get_unsigned();
-        std::pair<uint32_t, bool> instruction = read_memory_instruction(instruction_address);
+        std::pair<std::array<uint8_t, 4>, bool> instruction = read_memory_instruction(instruction_address);
 
         if (!instruction.second) {
             return StepResult::HALT;
         }
 
-        InstructionHandler *handler = get_instruction_handler(instruction.first & 0xFF);
+        InstructionHandler *handler = get_instruction_handler(instruction.first[0]);
         if (handler == nullptr) {
             return StepResult::INVALID_INSTRUCTION;
         }
         ModificationList modifications = handler->handle(instruction.first, instruction_address, machine_state);
+        uint8_t instruction_length = handler->n_bytes(instruction.first, instruction_address, machine_state);
+        modifications.push_back({{ModificationTarget::PC, 0}, instruction_address + instruction_length});
         machine_state.apply_modifications(modifications);
 
         for (const auto &modification : modifications) {

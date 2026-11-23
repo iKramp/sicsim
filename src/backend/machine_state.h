@@ -21,6 +21,7 @@ namespace SicSimBackend {
         MEM1B,
         MEM3B,
         MEM6B,
+        DEVICE,
         HALT,
     };
 
@@ -45,7 +46,7 @@ namespace SicSimBackend {
         std::string display_current_instruction();
         MachineState clone();
         // returns what the next execution will modify
-        void apply_modifications(ModificationList modifications);
+        void apply_modifications(ModificationList modifications, bool apply_memory = true);
 
         uint24_t get_register_value(uint8_t reg_num);
 
@@ -60,9 +61,10 @@ namespace SicSimBackend {
     uint24_t read_memory(uint24_t address);
     float48_t read_memory_float(uint24_t address);
     //returns if there's any valid memory after this instruction
-    std::pair<uint32_t, bool> read_memory_instruction(uint24_t address);
+    std::pair<std::array<uint8_t, 4>, bool> read_memory_instruction(uint24_t address);
     uint8_t read_memory_byte(uint24_t address);
     uint8_t *get_memory_pointer(uint32_t address);
+    void set_max_written_address(uint32_t address, bool force);
 
     ModificationTarget reg_into_modification_target(Register reg);
 

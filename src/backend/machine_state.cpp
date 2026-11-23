@@ -1,5 +1,7 @@
 #include "machine_state.h"
+#include <array>
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 
 #define MEM_SIZE (1 << 20)
@@ -25,7 +27,7 @@ namespace SicSimBackend {
         return copy;
     }
 
-    void MachineState::apply_modifications(ModificationList modifications) {
+    void MachineState::apply_modifications(ModificationList modifications, bool apply_memory) {
         bool pc_modified = false;
 
         for (const auto &modification : modifications) {
@@ -58,20 +60,29 @@ namespace SicSimBackend {
                 throw std::runtime_error("ModificationTarget::F is not supported yet");
                 break;
             case ModificationTarget::PC:
+                if (pc_modified) {
+                    break;
+                }
                 PC.set_value(modification.second, 24, false);
                 pc_modified = true;
                 break;
             case ModificationTarget::MEM1B:
-                // write_memory(modification.second, modification.second, 1);
-                write_memory_byte(modification.first.second, static_cast<uint8_t>(modification.second & 0xFF));
+                if (apply_memory) {
+                    write_memory_byte(modification.first.second, static_cast<uint8_t>(modification.second & 0xFF));
+                }
                 break;
             case ModificationTarget::MEM3B:
-                write_memory(modification.first.second, modification.second);
+                if (apply_memory) {
+                    write_memory(modification.first.second, modification.second);
+                }
                 break;
             case ModificationTarget::MEM6B:
-                write_memory_float(modification.first.second, modification.second);
+                if (apply_memory) {
+                    write_memory_float(modification.first.second, modification.second);
+                }
                 break;
             case ModificationTarget::HALT:
+            case ModificationTarget::DEVICE:
                 break;
             }
         }
@@ -136,6 +147,7 @@ namespace SicSimBackend {
         if (address.get_unsigned() + 3 > MEM_SIZE) {
             return;
         }
+
         memory[address.get_unsigned()] = static_cast<uint8_t>((value.get_unsigned() >> 16) & 0xFF);
         memory[address.get_unsigned() + 1] = static_cast<uint8_t>((value.get_unsigned() >> 8) & 0xFF);
         memory[address.get_unsigned() + 2] = static_cast<uint8_t>(value.get_unsigned() & 0xFF);
@@ -146,7 +158,13 @@ namespace SicSimBackend {
         if (address.get_unsigned() + 6 > MEM_SIZE) {
             return;
         }
-        throw std::runtime_error("write_memory_float is not implemented yet");
+        uint64_t float_value = value.get_u64();
+        memory[address.get_unsigned()] = static_cast<uint8_t>((float_value >> 40) & 0xFF);
+        memory[address.get_unsigned() + 1] = static_cast<uint8_t>((float_value >> 32) & 0xFF);
+        memory[address.get_unsigned() + 2] = static_cast<uint8_t>((float_value >> 24) & 0xFF);
+        memory[address.get_unsigned() + 3] = static_cast<uint8_t>((float_value >> 16) & 0xFF);
+        memory[address.get_unsigned() + 4] = static_cast<uint8_t>((float_value >> 8) & 0xFF);
+        memory[address.get_unsigned() + 5] = static_cast<uint8_t>(float_value & 0xFF);
         max_written_address = std::max(max_written_address, address.get_unsigned() + 6);
     }
 
@@ -166,24 +184,32 @@ namespace SicSimBackend {
         return uint24_t(value);
     }
 
-    std::pair<uint32_t, bool> read_memory_instruction(uint24_t address) {
-        if (address.get_unsigned() + 3 > MEM_SIZE) {
-            return std::make_pair(0, false);
+    std::pair<std::array<uint8_t, 4>, bool> read_memory_instruction(uint24_t address_) {
+        uint32_t address = address_.get_unsigned();
+
+        if (address + 4 > MEM_SIZE) {
+            return {{0, 0, 0, 0}, false};
         }
 
-        bool valid_instruction = address.get_unsigned() <= max_written_address;
+        bool valid_instruction = address <= max_written_address;
 
-        uint32_t instruction = (static_cast<uint32_t>(memory[address.get_unsigned()]) << 16) |
-                               (static_cast<uint32_t>(memory[address.get_unsigned() + 1]) << 8) |
-                               static_cast<uint32_t>(memory[address.get_unsigned() + 2]);
-        return std::make_pair(instruction, valid_instruction);
+        uint8_t byte1 = memory[address];
+        uint8_t byte2 = memory[address + 1];
+        uint8_t byte3 = memory[address + 2];
+        uint8_t byte4 = memory[address + 3];
+
+        return {{byte1, byte2, byte3, byte4}, valid_instruction};
     }
 
     float48_t read_memory_float(uint24_t address) {
         if (address.get_unsigned() + 6 > MEM_SIZE) {
             return float48_t(0);
         }
-        throw std::runtime_error("read_memory_float is not implemented yet");
+        uint64_t value =
+            (static_cast<uint64_t>(memory[address.get_unsigned()]) << 40) | (static_cast<uint64_t>(memory[address.get_unsigned() + 1]) << 32) |
+            (static_cast<uint64_t>(memory[address.get_unsigned() + 2]) << 24) | (static_cast<uint64_t>(memory[address.get_unsigned() + 3]) << 16) |
+            (static_cast<uint64_t>(memory[address.get_unsigned() + 4]) << 8) | static_cast<uint64_t>(memory[address.get_unsigned() + 5]);
+        return float48_t(value);
     }
 
     uint8_t *get_memory_pointer(uint32_t address) {
@@ -191,6 +217,14 @@ namespace SicSimBackend {
             return nullptr;
         }
         return &memory[address];
+    }
+
+    void set_max_written_address(uint32_t address, bool force) {
+        if (force) {
+            max_written_address = address;
+        } else {
+            max_written_address = std::max(max_written_address, address);
+        }
     }
 
     ModificationTarget reg_into_modification_target(Register reg) {

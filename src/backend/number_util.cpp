@@ -65,4 +65,8 @@ namespace SicSimBackend {
         }
         return uint24_t(shifted & 0xFFFFFF);
     }
+
+    uint64_t float48_t::get_u64() {
+        return value & 0xFFFFFFFFFFFF;
+    }
 }

@@ -34,5 +34,7 @@ namespace SicSimBackend {
     public:
         float48_t() : value(0) {}
         float48_t(uint64_t v) : value(v & 0xFFFFFFFFFFFF) {}
+
+        uint64_t get_u64();
     };
 } // namespace SicSimBackend

@@ -308,8 +308,8 @@ namespace SicSimUi {
         ImGuiStyle &style = ImGui::GetStyle();
         ImGui::StyleColorsDark();
         // ImGui::StyleColorsLight();
-        // style.FontSizeBase = 16.0f;           // Default to 13.0f when unspecified, which allows crisp legacy font for non-4K screens.
-        style.FrameRounding = 3.0f;
+        style.FontSizeBase = 16.0f;
+        style.FrameRounding = 0.0f;
         style.GrabRounding = 3.0f;
 
         // Setup scaling
@@ -350,7 +350,7 @@ namespace SicSimUi {
     // state
     static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    void update_ui(SicSimBackend::MachineState &machine_state, void (*render_callback)(SicSimBackend::MachineState &machine_state)) {
+    void update_ui(RenderState &render_state, void (*render_callback)(RenderState &)) {
         glfwPollEvents();
 
         // Resize swap chain?
@@ -372,7 +372,7 @@ namespace SicSimUi {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
 
-        render_callback(machine_state);
+        render_callback(render_state);
 
         // Rendering
         ImGui::Render();

@@ -1,7 +1,8 @@
 #include "compare.h"
+#include <array>
 
 namespace SicSimBackend {
-    ModificationList OpComp::handle(uint32_t instruction,
+    ModificationList OpComp::handle(std::array<uint8_t, 4> instruction,
                             uint24_t instruction_address, MachineState &machine_state) {
         Format34Instruction decoded =
             decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
@@ -20,15 +21,19 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpComp::display_instruction(uint32_t instruction, uint24_t instruction_address,
+    std::string OpComp::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         std::string out =
             "COMP " +
             display_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state).address_str;
         return out;
     }
+    uint8_t OpComp::n_bytes(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
+        Format34Instruction decoded = decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
+        return decoded.extended ? 4 : 3;
+    }
 
-    ModificationList OpCompr::handle(uint32_t instruction,
+    ModificationList OpCompr::handle(std::array<uint8_t, 4> instruction,
                             uint24_t instruction_address, MachineState &machine_state) {
         Format2Instruction decoded =
             decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
@@ -48,14 +53,17 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpCompr::display_instruction(uint32_t instruction, uint24_t instruction_address,
+    std::string OpCompr::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         Format2Display out = display_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         std::string out_str = "COMPR " + out.reg1_name + ", " + out.reg2_name;
         return out_str;
     }
+    uint8_t OpCompr::n_bytes(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
+        return 2;
+    }
 
-    ModificationList OpTix::handle(uint32_t instruction,
+    ModificationList OpTix::handle(std::array<uint8_t, 4> instruction,
                             uint24_t instruction_address, MachineState &machine_state) {
         Format34Instruction decoded =
             decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
@@ -77,15 +85,19 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpTix::display_instruction(uint32_t instruction, uint24_t instruction_address,
+    std::string OpTix::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         std::string out =
             "TIX " +
             display_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state).address_str;
         return out;
     }
+    uint8_t OpTix::n_bytes(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
+        Format34Instruction decoded = decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
+        return decoded.extended ? 4 : 3;
+    }
 
-    ModificationList OpTixr::handle(uint32_t instruction,
+    ModificationList OpTixr::handle(std::array<uint8_t, 4> instruction,
                             uint24_t instruction_address, MachineState &machine_state) {
         Format2Instruction decoded =
             decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
@@ -108,10 +120,13 @@ namespace SicSimBackend {
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::SW, 0), newSW));
         return modifications;
     }
-    std::string OpTixr::display_instruction(uint32_t instruction, uint24_t instruction_address,
+    std::string OpTixr::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address,
                                            MachineState &machine_state) {
         Format2Display out = display_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         std::string out_str = "TIXR " + out.reg1_name;
         return out_str;
+    }
+    uint8_t OpTixr::n_bytes(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
+        return 2;
     }
 }
