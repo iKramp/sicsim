@@ -1,4 +1,5 @@
 #include "machine_state.h"
+#include "backend/devices/device.h"
 #include <array>
 #include <cstring>
 #include <iostream>
@@ -27,7 +28,7 @@ namespace SicSimBackend {
         return copy;
     }
 
-    void MachineState::apply_modifications(ModificationList modifications, bool apply_memory) {
+    void MachineState::apply_modifications(ModificationList modifications) {
         bool pc_modified = false;
 
         for (const auto &modification : modifications) {
@@ -67,22 +68,26 @@ namespace SicSimBackend {
                 pc_modified = true;
                 break;
             case ModificationTarget::MEM1B:
-                if (apply_memory) {
-                    write_memory_byte(modification.first.second, static_cast<uint8_t>(modification.second & 0xFF));
-                }
+                write_memory_byte(modification.first.second, static_cast<uint8_t>(modification.second & 0xFF));
                 break;
             case ModificationTarget::MEM3B:
-                if (apply_memory) {
-                    write_memory(modification.first.second, modification.second);
-                }
+                write_memory(modification.first.second, modification.second);
                 break;
             case ModificationTarget::MEM6B:
-                if (apply_memory) {
-                    write_memory_float(modification.first.second, modification.second);
-                }
+                write_memory_float(modification.first.second, modification.second);
                 break;
             case ModificationTarget::HALT:
+                break;
             case ModificationTarget::DEVICE:
+                DeviceTarget target(modification.first.second.get_unsigned());
+                Device *device = get_device(target.device_id);
+                if (device != nullptr) {
+                    if (target.write_flag) {
+                        device->write(static_cast<uint8_t>(modification.second & 0xFF));
+                    } else {
+                        device->read(); // byte was already read with peek, this just discards it
+                    }
+                }
                 break;
             }
         }
@@ -247,6 +252,8 @@ namespace SicSimBackend {
             return ModificationTarget::PC;
         case Register::F:
             return ModificationTarget::F;
+        default:
+            return ModificationTarget::A; // shouldn't be used
         }
     }
 

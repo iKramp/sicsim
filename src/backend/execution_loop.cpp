@@ -1,5 +1,6 @@
 #include "execution_loop.h"
 #include <array>
+#include <iostream>
 #include "backend/instructions/instruction.h"
 #include "backend/machine_state.h"
 
@@ -11,7 +12,7 @@ namespace SicSimBackend {
         init_memory();
     }
 
-    StepResult step_sim() {
+    StepResult single_step() {
         uint32_t instruction_address = machine_state.PC.get_unsigned();
         std::pair<std::array<uint8_t, 4>, bool> instruction = read_memory_instruction(instruction_address);
 
@@ -30,6 +31,27 @@ namespace SicSimBackend {
 
         for (const auto &modification : modifications) {
             if (modification.first.first == ModificationTarget::HALT) {
+                return StepResult::HALT;
+            }
+        }
+        return StepResult::CONTINUE;
+    }
+
+    StepResult step_sim(uint32_t n_steps, uint32_t step_to_addr) {
+        while (n_steps > 0) {
+            n_steps--;
+            StepResult result = single_step();
+            switch (result) {
+
+            case StepResult::CONTINUE:
+                break;
+            case StepResult::HALT:
+            case StepResult::INVALID_INSTRUCTION:
+                return result;
+            }
+
+            uint32_t addr = machine_state.PC.get_unsigned();
+            if (addr == step_to_addr) {
                 return StepResult::HALT;
             }
         }

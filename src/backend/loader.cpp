@@ -5,14 +5,37 @@
 #include <string>
 
 namespace SicSimBackend {
-    void load_program(const std::string &filename, MachineState &machine_state) {
+    bool load_program(const std::string &filename, MachineState &machine_state) {
         machine_state = MachineState(); // Reset the machine state
-        std::ifstream program;
-        program.open(filename);
+        std::ifstream file(filename, std::ios::binary);
 
-        while (!program.eof()) {
+        if (!file) {
+            std::cerr << "Error: Could not open file " << filename << std::endl;
+            return false;
+        }
+
+        std::vector<uint8_t> program_bytes((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+        return load_program_bytes(program_bytes, machine_state);
+    }
+
+    bool load_program_bytes(const std::vector<uint8_t> &program_bytes, MachineState &machine_state) {
+        uint32_t loaded_bytes = 0;
+        while (1) {
+            if (loaded_bytes >= program_bytes.size()) {
+                break;
+            }
+
+            int newline_index = program_bytes.size();
+            for (uint32_t i = loaded_bytes; i < program_bytes.size(); i++) {
+                if (program_bytes[i] == '\n') {
+                    newline_index = i;
+                    break;
+                }
+            }
             std::string line;
-            std::getline(program, line);
+            line = std::string(program_bytes.begin() + loaded_bytes, program_bytes.begin() + newline_index);
+            loaded_bytes = newline_index + 1;
             if (line.empty()) {
                 continue;
             }
@@ -37,7 +60,7 @@ namespace SicSimBackend {
                 uint32_t start_address = std::stoul(line.substr(1, 6), nullptr, 16);
                 machine_state.PC = uint24_t(start_address);
 
-                std::cout << "Setting program counter to 0x" << std::hex << start_address << std::endl;
+                std::cout << "Setting program counter to 0x" << std::hex << start_address << std::dec << std::endl;
                 break;
             }
             case 'M': {
@@ -58,5 +81,6 @@ namespace SicSimBackend {
             }
             }
         }
+        return true;
     }
 } // namespace SicSimBackend

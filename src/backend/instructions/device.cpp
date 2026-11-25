@@ -15,7 +15,7 @@ namespace SicSimBackend {
         DeviceTarget target = {static_cast<uint8_t>(decoded.value.get_unsigned() & 0xFF), 0};
 
         modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::A, 0), new_a));
-        modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::DEVICE, target.to_uint32()), 0));
+        modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::DEVICE, target.to_uint32()), new_a));
         return modifications;
     }
     std::string OpReadDevice::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
@@ -30,8 +30,8 @@ namespace SicSimBackend {
     ModificationList OpWriteDevice::handle(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
         Format34Instruction decoded = decode_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state);
         ModificationList modifications;
-        DeviceTarget target = {static_cast<uint8_t>(decoded.value.get_unsigned() & 0xFF), 0};
-        modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::DEVICE, target.to_uint32()), 0));
+        DeviceTarget target = {static_cast<uint8_t>(decoded.value.get_unsigned() & 0xFF), 1};
+        modifications.push_back(std::make_pair(std::make_pair(ModificationTarget::DEVICE, target.to_uint32()), machine_state.rA.get_unsigned() & 0xFF));
         return modifications;
     }
     std::string OpWriteDevice::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {

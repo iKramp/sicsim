@@ -4,7 +4,6 @@
 #include "ui/control_panel.h"
 #include "ui/memory_view.h"
 #include "ui/register_view.h"
-#include <iostream>
 #include <stdlib.h> // abort
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
@@ -36,7 +35,7 @@ namespace SicSimUi {
             ImGuiID dock_id_control = 0;
             ImGui::DockBuilderSplitNode(dock_id_left_bottom, ImGuiDir_Up, 0.20f, &dock_id_control, &dock_id_left_bottom);
             ImGui::DockBuilderDockWindow("Hex", dock_id_hex);
-            ImGui::DockBuilderDockWindow("Registers", dock_id_reg);
+            ImGui::DockBuilderDockWindow("State", dock_id_reg);
             ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left_bottom);
             ImGui::DockBuilderDockWindow("Control Panel", dock_id_control);
             ImGui::DockBuilderFinish(dockspace_id);
@@ -46,11 +45,11 @@ namespace SicSimUi {
         ImGui::Begin("Hex", nullptr, default_window_flags);
         SicSimUi::render_memory_view(SicSimBackend::get_memory_pointer(0));
         ImGui::End();
-        ImGui::Begin("Registers", nullptr, default_window_flags);
+        ImGui::Begin("State", nullptr, default_window_flags);
         SicSimUi::render_register_view(render_state.machine_state, render_state.machine_state_changed);
         ImGui::End();
         ImGui::Begin("Control Panel", nullptr, default_window_flags);
-        ControlPanelAction action = render_control_panel(render_state.control_panel_state);
+        ControlPanelAction action = render_control_panel(render_state);
         ImGui::End();
 
         render_state.control_panel_action = action;

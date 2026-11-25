@@ -26,7 +26,7 @@ namespace SicSimBackend {
         Format2Instruction decoded = decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
         modifications.push_back(
-            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg1_val.add(decoded.reg2_val).get_unsigned()));
+            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg2_val.add(decoded.reg1_val).get_unsigned()));
         return modifications;
     }
     std::string OpAddr::display_instruction(std::array<uint8_t, 4> instruction, uint24_t _instruction_address,
@@ -93,7 +93,7 @@ namespace SicSimBackend {
         Format2Instruction decoded = decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
         modifications.push_back(
-            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg1_val.div(decoded.reg2_val).get_unsigned()));
+            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg2_val.div(decoded.reg1_val).get_unsigned()));
         return modifications;
     }
     std::string OpDivr::display_instruction(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {
@@ -125,7 +125,7 @@ namespace SicSimBackend {
         Format2Instruction decoded = decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
         modifications.push_back(
-            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg1_val.mul(decoded.reg2_val).get_unsigned()));
+            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg2_val.mul(decoded.reg1_val).get_unsigned()));
         return modifications;
     }
     std::string OpMulr::display_instruction(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {
@@ -172,12 +172,13 @@ namespace SicSimBackend {
         Format2Instruction decoded = decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
         modifications.push_back(
-            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg1_val.shl(decoded.reg2 + 1).get_unsigned()));
+            std::make_pair(std::make_pair(decoded.reg1_target, 0), decoded.reg1_val.shl(decoded.reg2 + 1).get_unsigned()));
         return modifications;
     }
     std::string OpShiftL::display_instruction(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {
         Format2Display display = display_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
-        return "SHIFTL " + display.reg1_name + ", " + display.reg2_name;
+        std::string shift_val = std::to_string(display.reg2_index.get_unsigned() + 1);
+        return "SHIFTL " + display.reg1_name + ", " + shift_val;
     }
     uint8_t OpShiftL::n_bytes(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {
         return 2;
@@ -187,12 +188,13 @@ namespace SicSimBackend {
         Format2Instruction decoded = decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
         modifications.push_back(
-            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg1_val.shr(decoded.reg2 + 1, true).get_unsigned()));
+            std::make_pair(std::make_pair(decoded.reg1_target, 0), decoded.reg1_val.shr(decoded.reg2 + 1, true).get_unsigned()));
         return modifications;
     }
     std::string OpShiftR::display_instruction(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {
         Format2Display display = display_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
-        return "SHIFTR " + display.reg1_name + ", " + display.reg2_name;
+        std::string shift_val = std::to_string(display.reg2_index.get_unsigned() + 1);
+        return "SHIFTR " + display.reg1_name + ", " + shift_val;
     }
     uint8_t OpShiftR::n_bytes(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {
         return 2;
@@ -219,7 +221,7 @@ namespace SicSimBackend {
         Format2Instruction decoded = decode_format2(reinterpret_cast<uint8_t *>(&instruction), machine_state);
         ModificationList modifications;
         modifications.push_back(
-            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg1_val.sub(decoded.reg2_val).get_unsigned()));
+            std::make_pair(std::make_pair(decoded.reg2_target, 0), decoded.reg2_val.sub(decoded.reg1_val).get_unsigned()));
         return modifications;
     }
     std::string OpSubr::display_instruction(std::array<uint8_t, 4> instruction, uint24_t _instruction_address, MachineState &machine_state) {

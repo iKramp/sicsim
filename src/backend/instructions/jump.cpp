@@ -33,7 +33,9 @@ namespace SicSimBackend {
         return modifications;
     }
     std::string OpConditionalJump::display_instruction(std::array<uint8_t, 4> instruction, uint24_t instruction_address, MachineState &machine_state) {
-        std::string out = "J" + std::to_string(static_cast<uint8_t>(condition)) + " " +
+        std::string cond = condition == CCState::EQ ? "EQ" :
+            (condition == CCState::GT ? "GT" : "LT");
+        std::string out = "J" + cond + " " +
                           display_format34(reinterpret_cast<uint8_t *>(&instruction), instruction_address, machine_state).address_str;
         return out;
     }

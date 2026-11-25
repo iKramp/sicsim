@@ -22,4 +22,5 @@ namespace SicSimBackend {
     };
 
     Device *get_device(uint8_t device_id);
+    void init_devices();
 } // namespace SicSimBackend

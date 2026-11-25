@@ -12,8 +12,8 @@ namespace SicSimBackend {
         uint24_t() : value(0) {}
         uint24_t(uint64_t v) : value(v & 0xFFFFFF) {}
 
-        uint32_t get_signed();
-        uint32_t get_unsigned();
+        int32_t get_signed();
+        uint32_t get_unsigned() const;
 
         uint24_t add(uint24_t other);
         uint24_t sub(uint24_t other);

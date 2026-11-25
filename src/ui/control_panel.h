@@ -1,18 +1,7 @@
 #pragma once
 #include "backend/machine_state.h"
+#include "ui/mod.h"
 
 namespace SicSimUi {
-    enum class ControlPanelState {
-        Running,
-        Paused,
-    };
-
-    enum class ControlPanelAction {
-        None,
-        Step,
-        Run,
-        Pause
-    };
-
-    ControlPanelAction render_control_panel(ControlPanelState state);
+    ControlPanelAction render_control_panel(RenderState &render_state);
 }

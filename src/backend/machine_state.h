@@ -46,7 +46,7 @@ namespace SicSimBackend {
         std::string display_current_instruction();
         MachineState clone();
         // returns what the next execution will modify
-        void apply_modifications(ModificationList modifications, bool apply_memory = true);
+        void apply_modifications(ModificationList modifications);
 
         uint24_t get_register_value(uint8_t reg_num);
 

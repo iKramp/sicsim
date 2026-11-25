@@ -22,6 +22,13 @@ static bool g_SwapChainRebuild = false;
 static GLFWwindow *g_Window = nullptr;
 ImGuiIO *io = nullptr;
 
+namespace SicSimUi {
+    void set_framerate_limit(int fps) {
+        ImGuiContext &g = *GImGui;
+        g.IO.Framerate = fps;
+    }
+}
+
 static void glfw_error_callback(int error, const char *description) { fprintf(stderr, "GLFW Error %d: %s\n", error, description); }
 static void check_vk_result(VkResult err) {
     if (err == VK_SUCCESS) {
@@ -344,6 +351,7 @@ namespace SicSimUi {
         g.IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         g.IO.ConfigDockingNoDockingOver = true;
         g.IO.IniFilename = nullptr; // Disable saving .ini file
+        g.IO.Framerate = 100.0f;
         return 0;
     }
 

@@ -62,6 +62,8 @@
             curl
             pkgs.glfw
 
+            valgrind
+
           ];
 
           IMGUI_DIR = imgui;

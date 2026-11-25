@@ -11,6 +11,7 @@ namespace SicSimUi {
     void update_ui(RenderState &render_state, void (*render_callback)(RenderState &render_state));
     void cleanup_ui();
     bool should_close_ui();
+    void set_framerate_limit(int fps);
 
     GLFWwindow *get_window();
     ImGuiIO *get_io();

@@ -1,15 +1,16 @@
 #include "number_util.h"
+#include <iostream>
 
 namespace SicSimBackend {
-    uint32_t uint24_t::get_signed() {
-        if (value & 0x800000) {
-            return value | 0xFF000000;
+    int32_t uint24_t::get_signed() {
+        if (this->value & 0x800000) {
+            return static_cast<int32_t>(this->value & 0xFFFFFF) | 0xFF000000;
         } else {
-            return value & 0xFFFFFF;
+            return static_cast<int32_t>(this->value);
         }
     }
 
-    uint32_t uint24_t::get_unsigned() {
+    uint32_t uint24_t::get_unsigned() const {
         return value & 0xFFFFFF;
     }
 
@@ -58,6 +59,10 @@ namespace SicSimBackend {
     }
 
     uint24_t uint24_t::shr(uint8_t n, bool is_signed) {
+        if (n >= 24) {
+            return uint24_t(0);
+        }
+
         bool is_negative = (get_signed() & 0x800000) != 0;
         uint32_t shifted = get_unsigned() >> n;
         if (is_signed && is_negative) {

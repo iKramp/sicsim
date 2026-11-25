@@ -1,17 +1,33 @@
 #include "device.h"
 #include <cstdio>
+#include <iostream>
 
 static SicSimBackend::Device *devices[256] = {nullptr};
 
 class TestDevice : public SicSimBackend::Device {
+    bool saved = false;
+    uint8_t saved_value = 0;
 public:
     uint8_t read() override {
-        return getchar();
+        if (saved) {
+            saved = false;
+            return saved_value;
+        } else {
+            return getchar();
+        }
     }
     uint8_t peek() override {
-        uint8_t value = read();
-        ungetc(value, stdin);
-        return value;
+        if (saved) {
+            return saved_value;
+        } else {
+            int value = getchar();
+            if (value == EOF) {
+                return 0;
+            }
+            saved = true;
+            saved_value = static_cast<uint8_t>(value);
+            return saved_value;
+        }
     }
     void write(uint8_t value) override {
         putchar(value);

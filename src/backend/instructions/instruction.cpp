@@ -7,6 +7,7 @@
 #include "backend/machine_state.h"
 #include "backend/number_util.h"
 #include "backend/register.h"
+#include <cstdio>
 #include <iostream>
 #include <stdexcept>
 
@@ -33,6 +34,8 @@ namespace SicSimBackend {
         decoded.reg2_target = reg_into_modification_target(reg2_enum);
         //stupid spec, only for clear
         decoded.reg1_target = reg_into_modification_target(reg1_enum);
+        decoded.reg1 = reg1;
+        decoded.reg2 = reg2;
         return decoded;
     }
 
@@ -52,7 +55,7 @@ namespace SicSimBackend {
         //base relative (unsigned, p = 0)
         //pc relative (signed, p = 1)
         //direct (unsigned, p = 0)
-        bool offset_signed = p == 0;
+        bool offset_signed = p == 1;
 
         bool x_used = n == i && x;
 
@@ -75,6 +78,20 @@ namespace SicSimBackend {
 
         uint8_t ni;
         ni = ((uint8_t)n << 1) | (uint8_t)i;
+
+        if (ni == 0) {
+            b = 0;
+            p = 0;
+        }
+
+        int32_t offset_before_pcb = offset_signed ? offset.get_signed() : offset.get_unsigned();
+
+        if (p == 1) {
+            offset = offset.add(instruction_address).add(3);
+        }
+        if (b == 1) {
+            offset = offset.add(machine_state.rB);
+        }
 
         uint24_t address;
         uint24_t int_value;
@@ -99,13 +116,6 @@ namespace SicSimBackend {
             break;
         }
 
-        if (p == 1) {
-            address = address.add(instruction_address).add(3);
-        }
-        if (b == 1) {
-            address = address.add(machine_state.rB);
-        }
-
         if (immediate) {
             int_value = address;
         } else {
@@ -117,6 +127,12 @@ namespace SicSimBackend {
         decoded.float_value = float_value;
         decoded.addr = address;
         decoded.extended = e;
+        decoded.immediate = immediate;
+        decoded.base_relative = b;
+        decoded.pc_relative = p;
+        decoded.indexed = x_used;
+        decoded.indirect = n == 1 && i == 0;
+        decoded.offset = offset_before_pcb;
         return decoded;
     }
 
@@ -126,12 +142,42 @@ namespace SicSimBackend {
         uint8_t reg2 = instruction[1] & 0x0F;
         display.reg1_name = get_register_name(static_cast<Register>(reg1));
         display.reg2_name = get_register_name(static_cast<Register>(reg2));
+        display.reg1_index = reg1;
+        display.reg2_index = reg2;
         return display;
     }
 
     Format34Display display_format34(uint8_t *instruction, uint24_t instruction_address, MachineState &machine_state) {
+        Format34Instruction decoded = decode_format34(instruction, instruction_address, machine_state);
+
         Format34Display display;
-        display.address_str = "temp";
+        unsigned char buffer[20];
+
+        unsigned char off_buffer[15];
+        if (decoded.offset < 0) {
+            sprintf((char *)off_buffer, "-0x%X", -decoded.offset);
+        } else {
+            sprintf((char *)off_buffer, "0x%X", decoded.offset);
+        }
+
+        if (decoded.immediate) {
+            sprintf((char *)buffer, "#%X", decoded.value.get_unsigned());
+            display.address_str = std::string((char *)buffer);
+        } else if (decoded.indirect) {
+            sprintf((char *)buffer, "@%s", off_buffer);
+            display.address_str = std::string((char *)buffer);
+        } else { //simple
+            sprintf((char *)buffer, "%s", off_buffer);
+            display.address_str = std::string((char *)buffer);
+        }
+
+        if (decoded.pc_relative) {
+            display.address_str += "+(PC)";
+        } else if (decoded.base_relative) {
+            display.address_str += "+(B)";
+        }
+        display.extended = decoded.extended;
+
         return display;
     }
 

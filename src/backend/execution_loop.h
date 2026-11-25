@@ -9,6 +9,7 @@ namespace SicSimBackend {
     };
 
     void init_execution_loop();
-    StepResult step_sim();
+    StepResult single_step();
+    StepResult step_sim(uint32_t n_steps, uint32_t step_to_addr);
     MachineState &get_machine_state();
 } // namespace ExecutionLoop

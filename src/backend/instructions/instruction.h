@@ -25,6 +25,8 @@ namespace SicSimBackend {
     public:
         std::string reg1_name;
         std::string reg2_name;
+        uint24_t reg1_index;
+        uint24_t reg2_index;
     };
 
     class Format34Instruction {
@@ -33,11 +35,20 @@ namespace SicSimBackend {
         uint24_t value;
         float48_t float_value;
         uint8_t extended;
+
+        //for displaying
+        bool pc_relative;
+        bool base_relative;
+        int32_t offset;
+        bool immediate;
+        bool indirect;
+        bool indexed;
     };
 
     class Format34Display {
     public:
         std::string address_str;
+        bool extended;
     };
 
     void init_instruction_handler_table();
