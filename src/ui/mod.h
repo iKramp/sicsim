@@ -16,7 +16,8 @@ namespace SicSimUi {
         Step,
         Run,
         RunTo,
-        Pause
+        Pause,
+        LoadFile,
     };
 
 
@@ -28,13 +29,15 @@ namespace SicSimUi {
         SicSimBackend::uint24_t run_to_address;
         uint32_t update_frequency;
         bool machine_state_changed;
+        std::string filename;
         RenderState(SicSimBackend::MachineState &machine_state) : 
             control_panel_action(ControlPanelAction::None),
             control_panel_state(MachineState::Paused), 
             machine_state(machine_state),
             run_to_address(0),
             update_frequency(100),
-            machine_state_changed(true)
+            machine_state_changed(true),
+            filename("")
         {}
     };
 

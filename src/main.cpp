@@ -31,14 +31,14 @@ int main(int argc, char *argv[]) {
     std::cout << "Initing execution loop..." << std::endl;
     SicSimBackend::init_execution_loop();
     SicSimBackend::MachineState &machine_state = SicSimBackend::get_machine_state();
+    SicSimUi::RenderState render_state = SicSimUi::RenderState(machine_state);
 
     if (argc == 2) {
-        std::string filename = argv[1];
-        std::cout << "Loading program: " << filename << std::endl;
-        SicSimBackend::load_program(filename, machine_state);
+        render_state.filename = argv[1];
+        std::cout << "Loading program: " << render_state.filename << std::endl;
+        SicSimBackend::load_program(render_state.filename, machine_state);
     }
 
-    SicSimUi::RenderState render_state = SicSimUi::RenderState(machine_state);
 
     std::chrono::system_clock::time_point last_time = std::chrono::system_clock::now();
     uint32_t steps = 0;
@@ -63,6 +63,10 @@ int main(int argc, char *argv[]) {
             render_state.control_panel_state = SicSimUi::MachineState::RunningTo;
             last_time = std::chrono::system_clock::now();
             steps = 0;
+        } else if (render_state.control_panel_action == SicSimUi::ControlPanelAction::LoadFile) {
+            render_state.control_panel_action = SicSimUi::ControlPanelAction::None;
+            std::cout << "Loading program: " << render_state.filename << std::endl;
+            SicSimBackend::load_program(render_state.filename, machine_state);
         }
 
         if (step || render_state.control_panel_state == SicSimUi::MachineState::Running ||

@@ -54,6 +54,7 @@ namespace SicSimUi {
         }
 
         ImGui::InputInt("Frequency (Hz)", (int *)&render_state.update_frequency);
+        ImGui::Text("Open file: %s", render_state.filename.c_str());
 
         if (running_to_edited) {
             uint32_t new_val = strtoul(runnnig_to_string, nullptr, 16);
